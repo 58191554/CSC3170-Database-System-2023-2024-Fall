@@ -1,3 +1,7 @@
+'''
+Author: Zhen Tong 120090694@link.cuhk.edu.cn
+'''
+
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting

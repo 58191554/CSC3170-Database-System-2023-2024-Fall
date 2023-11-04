@@ -5,7 +5,8 @@ Welcome to CSC3170-Database-System course 23 fall semester. You can visit our co
 In this repository, we will upload labs for you !
 
 - [x] Lab 1 Crawler and load database 
-- [ ] Lab 2 Data Manager
-- [ ] Lab 3 Transaction Manager 
-- [ ] Lab 4 Log files and recovery policies
-- [ ] Lab 5 Index Manager
+- [ ] Lab 2 Functional Dependency Simulation
+- [ ] Lab 3 Data Manager
+- [ ] Lab 4 Transaction Manager 
+- [ ] Lab 5 Log files and recovery policies
+- [ ] Lab 6 Index Manager

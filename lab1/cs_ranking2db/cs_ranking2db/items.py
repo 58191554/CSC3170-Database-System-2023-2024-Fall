@@ -1,3 +1,8 @@
+'''
+Author: Zhen Tong 120090694@link.cuhk.edu.cn
+'''
+
+
 # Define here the models for your scraped items
 #
 # See documentation in:
