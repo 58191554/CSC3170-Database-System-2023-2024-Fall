@@ -4,7 +4,7 @@ Author: Zhen Tong 120090694@link.cuhk.edu.cn
 
 import itertools
 from tqdm import tqdm
-
+import copy
 
 class FunctionalDependency:
 
@@ -125,11 +125,9 @@ class Schema:
             sub_combination = []
             for r in range(1, len(comb_list) + 1):
                 sub_combination.extend(list(itertools.combinations(comb_list, r)))
-            # print("subset size = ", len(sub_combination))
             for beta in sub_combination:
                 # add the trivial to F_plus
                 fd = FunctionalDependency(comb_list, beta)
-                # fd.show()
                 self.add_FD(fd, add2closure=True)
         
         print("The Closure Size is: ", len(self.F_plus))
@@ -166,10 +164,47 @@ class Schema:
         print("finish with size = ", len(self.F_plus))
         return self.F_plus
 
+    def sub_closure(self, sub_attrs:set, F=None):
+        '''
+        Given a set of attributes alpha, define the closure of alpha+ under F 
+        '''
+        if F == None:
+            F = self.FDs
+        result = set()
+        result_prime = set(a for a in sub_attrs)
+        while len(result) != len(result_prime):
+            # copy the prime to origin
+            result = set(a for a in result_prime)
+            # print("result = ", result)
+            for fd in F:
+                if fd.alpha.issubset( result) :
+                    result_prime = result_prime.union(fd.beta)
+                    # print("Unioned:", result_prime)
+            print("result", result)
+        return result
         
+    def is_extranious(self, fd:FunctionalDependency, A:set, determinant:bool):
+        alpha = copy.deepcopy(fd.alpha)
+        beta = copy.deepcopy(fd.beta)
+        if determinant:
+            gamma = alpha.difference(A)
+            gamma_plus = self.sub_closure(gamma)
+            if beta.issubset(gamma_plus):
+                return True
+            else:
+                return False
+        else:   
+            F= set(i for i in self.FDs)
+
+            F_prime = (F.difference({fd})).union({FunctionalDependency(alpha, beta.difference(A))})
+            alpha_plus = self.sub_closure(alpha, F_prime)
+            if A.issubset(alpha_plus):
+                return True
+            else:
+                return False
+
+    def canonicalCover(self, ):
         
-
-
 
 def is_subset(l1:list, l2:list):
     for i in l1:

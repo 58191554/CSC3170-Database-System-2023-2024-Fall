@@ -1,14 +1,8 @@
 '''
 Author: Zhen Tong 120090694@link.cuhk.edu.cn
 '''
-
-
-import itertools
-
 from utils import FunctionalDependency as FD
 from utils import Schema
-
-
 
 
 
@@ -17,7 +11,7 @@ from utils import Schema
 if __name__ == "__main__":
     
     '''
-    test 1 get add_FD
+    test get add_FD
     '''
     # fd1 = FD(["Property_id#"], ["County_name"])
     # fd2 = FD(["Property_id#"], ["Lot#"])
@@ -38,31 +32,46 @@ if __name__ == "__main__":
     # print(emp_proj.attrs)
 
     """
-    test 2 get closure
+    test get closure
     """
-    fd1 = FD({"A"}, {"B"})
-    fd2 = FD({"B"}, {"C"})
-    test2 = Schema()
-    fds = [fd1, fd2]
-    for fd in fds:
-        test2.add_FD(fd)
-    test2.closure()
-    # all_pairs = list(itertools.combinations(fds, 2))
-    # for pair in all_pairs:
-    #     # print(pair)
-    #     f1, f2 = pair
-    #     f1.show()
-    #     f2.show()
-    #     if f1.beta == f2.alpha:
-    #         new_fd = FD(f1.alpha, f2.beta)
-    #         new_fd.show()
-    #     if f2.beta == f1.alpha:
-    #         new_fd = FD(f2.alpha, f1.beta)
-    #         new_fd.show()
+    # fd1 = FD({"A"}, {"B"})
+    # fd2 = FD({"B"}, {"C"})
+    # test2 = Schema()
+    # fds = [fd1, fd2]
+    # for fd in fds:
+    #     test2.add_FD(fd)
+    # test2.closure()
 
+
+    """
+    test Closure of Attribute Sets
+    """
+    # fd1 = FD({"A"}, {"B"})
+    # fd2 = FD({"A"}, {"C"})
+    # fd3 = FD({"C", "G"}, {"H"})
+    # fd4 = FD({"C", "G"}, {"I"})
+    # fd5 = FD({"B"}, {"H"})
+    # fds = [fd1, fd2, fd3, fd4, fd5]
+    # test = Schema()
+    # for fd in fds:
+    #     test.add_FD(fd, False)
+    # sub_attributes = {"A", "G"}
+    # test.sub_closure(sub_attributes)
 
     '''
-    test 3 1NF
+    test Extraneous Attributes
+    '''
+    fd1 = FD({"A", "B"}, {"C", "D"})
+    fd2 = FD({"A"}, {"E"})
+    fd3 = FD({"E"}, {"C"})
+    fds = [fd1, fd2, fd3]
+    test = Schema()
+    for fd in fds:
+        test.add_FD(fd, False)
+    extrainous = test.is_extranious(fd1, {"C"}, determinant=False)
+    print("C's extrainous in  AB -> CD is ", extrainous)
+    '''
+    test 1NF
     '''
 
     # fd1 = FD(["Ssn", "Pnumber"], ["Hours"])
