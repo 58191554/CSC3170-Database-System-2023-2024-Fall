@@ -1,3 +1,10 @@
+'''
+Author: Zhen Tong 120090694@link.cuhk.edu.cn
+'''
+
+
+import itertools
+
 from utils import FunctionalDependency as FD
 from utils import Schema
 
@@ -34,12 +41,25 @@ if __name__ == "__main__":
     test 2 get closure
     """
     fd1 = FD({"A"}, {"B"})
-    fd2 = FD({"B"}, {"C", "D"})
+    fd2 = FD({"B"}, {"C"})
     test2 = Schema()
     fds = [fd1, fd2]
     for fd in fds:
         test2.add_FD(fd)
     test2.closure()
+    # all_pairs = list(itertools.combinations(fds, 2))
+    # for pair in all_pairs:
+    #     # print(pair)
+    #     f1, f2 = pair
+    #     f1.show()
+    #     f2.show()
+    #     if f1.beta == f2.alpha:
+    #         new_fd = FD(f1.alpha, f2.beta)
+    #         new_fd.show()
+    #     if f2.beta == f1.alpha:
+    #         new_fd = FD(f2.alpha, f1.beta)
+    #         new_fd.show()
+
 
     '''
     test 3 1NF

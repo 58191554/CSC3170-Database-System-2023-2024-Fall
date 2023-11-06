@@ -114,7 +114,7 @@ class Schema:
             return self.FDs
         
         # TODO update closure
-        self.F_plus = []
+        self.F_plus = [fd for fd in self.FDs]
         # apply the reflexivity rule /* Generate all trivial dependencies */
         # generate all the combination of attrs
         all_combinations = []
@@ -139,7 +139,7 @@ class Schema:
         while len(F_plus_copy) != len(self.F_plus):
             # update the copy
             F_plus_copy= [fd for fd in self.F_plus]
-            for fd in F_plus_copy:
+            for fd in tqdm(F_plus_copy):
                 # apply the augmentation rule on f
                 alpha = fd.alpha
                 beta = fd.beta
@@ -153,16 +153,16 @@ class Schema:
             # transitivity
             all_pairs = list(itertools.combinations(self.F_plus, 2))
             for pair in tqdm(all_pairs):
-                # print(pair)
                 f1, f2 = pair
                 if f1.beta == f2.alpha:
-                    new_fd = FunctionalDependency(f1.beta, f2.alpha)
+                    new_fd = FunctionalDependency(f1.alpha, f2.beta)
                     self.add_FD(new_fd, add2closure=True)
                 if f2.beta == f1.alpha:
-                    new_fd = FunctionalDependency(f2.beta, f1.alpha)
+                    new_fd = FunctionalDependency(f2.alpha, f1.beta)
                     self.add_FD(new_fd, add2closure=True)
             print("After transitivity, the Closure Size is: ", len(self.F_plus))
 
+            input()
         print("finish with size = ", len(self.F_plus))
         return self.F_plus
 
