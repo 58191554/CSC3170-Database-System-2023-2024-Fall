@@ -169,45 +169,7 @@ class Schema:
         print("finish with size = ", len(self.F_plus))
         return self.F_plus
 
-    def sub_closure(self, sub_attrs:set, F=None):
-        '''
-        Given a set of attributes alpha, define the closure of alpha+ under F 
-        '''
-        if F == None:
-            F = {fd for fd in self.FDs}
-        result = set()
-        result_prime = set(a for a in sub_attrs)
-        while len(result) != len(result_prime):
-            # copy the prime to origin
-            result = set(a for a in result_prime)
-            # print("result = ", result)
-            for fd in F:
-                if fd.alpha.issubset( result) :
-                    result_prime = result_prime.union(fd.beta)
-                    # print("Unioned:", result_prime)
-            # print("result", result)
-        return result
         
-    def is_extraneous(self, fd:FunctionalDependency, A:set, determinant:bool, F = None):
-        alpha = copy.deepcopy(fd.alpha)
-        beta = copy.deepcopy(fd.beta)
-        if determinant:
-            gamma = alpha.difference(A)
-            gamma_plus = self.sub_closure(gamma, F)
-            if beta.issubset(gamma_plus):
-                return True
-            else:
-                return False
-        else:   
-            if F == None:
-                F= set(i for i in self.FDs)
-
-            F_prime = (F.difference({fd})).union({FunctionalDependency(alpha, beta.difference(A))})
-            alpha_plus = self.sub_closure(alpha, F_prime)
-            if A.issubset(alpha_plus):
-                return True
-            else:
-                return False
 
     def canonicalCover(self):
         F_c = {fd for fd in self.FDs}
@@ -233,40 +195,42 @@ class Schema:
             print("find extraneous attribute in F_c_prime")
             F_c_non_etx = set()
             for fd in F_c_prime:
-                extraneous = False
                 A_s = {a for a in fd.alpha}
                 A_combinations = []
+                bad_A = set()
                 for r in range(1, len(A_s) + 1):
                     A_combinations.extend(list(itertools.combinations(A_s, r)))
                 for comb in A_combinations:
-                    if self.is_extraneous(fd, set(c for c in comb), determinant=True, F=F_c_prime):
+                    test_A = set(c for c in comb)
+                    if is_extraneous(fd, test_A, determinant=True, F=F_c_prime):
                         print("find Bad A")
                         fd.show()
-                        extraneous = True
-                        break
-                    
-                if extraneous:
-                    fd.show()
-                    break
+                        bad_A = bad_A.union(test_A)
+                new_alpha = A_s.difference(bad_A)
+                if len(new_alpha) != len(A_s) and len(new_alpha) != 0:
+                    new_fd = FunctionalDependency(new_alpha, fd.beta)
+                    F_c_non_etx.add(new_fd)
+                    print("new fd A", end=" ");new_fd.show()
+
 
                 B_s = {b for b in fd.beta}
                 B_combinations = []
-                for r in range(1, len(B_s) + 1):
+                bad_B = set()
+                for r in range(1, len(B_s)+1):
                     B_combinations.extend(list(itertools.combinations(B_s, r)))
-                print("B_combinations", B_combinations)
-                extraneous_Bs = set()
                 for comb in B_combinations:
-                    if self.is_extraneous(fd, set(c for c in comb), determinant=False, F=F_c_prime):
-                        print("find BAD", comb, "in ", end=" ")
+                    test_B = set(c for c in comb)
+                    if is_extraneous(fd, test_B, determinant=False, F=F_c_prime):
+                        print("find Bad B")
                         fd.show()
-                        extraneous = True
-                        extraneous_Bs = extraneous_Bs.union(set(c for c in comb))
-                new_beta = (fd.beta).difference(extraneous_Bs)
-                print("extraneous_Bs", extraneous_Bs)
-                new_fd = FunctionalDependency(fd.alpha, new_beta)
-                if new_fd.in_FD_set(F_c_non_etx)==False:
+                        bad_B = bad_B.union(test_B)
+                new_beta = B_s.difference(bad_B)
+                if len(new_beta)!=len(B_s) and len(new_beta) != 0:
+                    new_fd = FunctionalDependency(fd.alpha, new_beta)
                     F_c_non_etx.add(new_fd)
-                if (extraneous == False) and (fd.in_FD_set(F_c_non_etx)==False):
+                    print("new fd B", end=" ");new_fd.show()
+
+                if(len(bad_A) == 0) and (len(bad_B) == 0):
                     F_c_non_etx.add(fd)
                 
 
@@ -275,11 +239,10 @@ class Schema:
             for fd in F_c_non_etx:
                 fd.show()
 
-            # condition break
-            # if(FD_set_equal(F_c_prime, F_c_non_etx)):
-                # break
-
-            input()
+            if FD_set_equal(F_c_non_etx, F_c):
+                break
+            F_c = {fd for fd in F_c_non_etx}
+            # input()
         return F_c_prime
 
 
@@ -310,7 +273,7 @@ def FD_set_equal(fdset1:set, fd_set2:set):
     if len(fdset1) != len(fd_set2):
         return False
 
-    judge = [False * len(fdset1)]
+    judge = [False ]* len(fdset1)
     for i, f1 in enumerate(fdset1):
         for f2 in fd_set2:
             if f1.alpha == f2.alpha and f2.beta == f2.beta:
@@ -323,17 +286,37 @@ def FD_set_equal(fdset1:set, fd_set2:set):
     return True
     
 
-
-def is_subset(l1:list, l2:list):
-    for i in l1:
-        if i not in l2:
+def is_extraneous(fd:FunctionalDependency, A:set, determinant:bool, F:set):
+    alpha = copy.deepcopy(fd.alpha)
+    beta = copy.deepcopy(fd.beta)
+    if determinant:
+        gamma = alpha.difference(A)
+        gamma_plus = sub_closure(gamma, F)
+        if beta.issubset(gamma_plus):
+            return True
+        else:
             return False
-    return True
+    else:   
+        F_prime = (F.difference({fd})).union({FunctionalDependency(alpha, beta.difference(A))})
+        alpha_plus = sub_closure(alpha, F_prime)
+        if A.issubset(alpha_plus):
+            return True
+        else:
+            return False
 
-def subtract_set(l1:list, l2:list):
-    l_subtract = []
-    for i in l1:
-        if i not in l2:
-            l_subtract.append(i)
-    return l_subtract
-
+def sub_closure(sub_attrs:set, F:set):
+    '''
+    Given a set of attributes alpha, define the closure of alpha+ under F 
+    '''
+    result = set()
+    result_prime = set(a for a in sub_attrs)
+    while len(result) != len(result_prime):
+        # copy the prime to origin
+        result = set(a for a in result_prime)
+        # print("result = ", result)
+        for fd in F:
+            if fd.alpha.issubset( result) :
+                result_prime = result_prime.union(fd.beta)
+                # print("Unioned:", result_prime)
+        # print("result", result)
+    return result

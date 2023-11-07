@@ -1,7 +1,10 @@
 '''
 Author: Zhen Tong 120090694@link.cuhk.edu.cn
 '''
+import utils
 from utils import FunctionalDependency as FD
+from utils import is_extraneous
+from utils import sub_closure
 from utils import Schema
 
 
@@ -46,30 +49,30 @@ if __name__ == "__main__":
     """
     test Closure of Attribute Sets
     """
-    # fd1 = FD({"A"}, {"B"})
-    # fd2 = FD({"A"}, {"C"})
-    # fd3 = FD({"C", "G"}, {"H"})
-    # fd4 = FD({"C", "G"}, {"I"})
-    # fd5 = FD({"B"}, {"H"})
-    # fds = [fd1, fd2, fd3, fd4, fd5]
-    # test = Schema()
-    # for fd in fds:
-    #     test.add_FD(fd, False)
-    # sub_attributes = {"A", "G"}
-    # test.sub_closure(sub_attributes)
+    fd1 = FD({"A"}, {"B"})
+    fd2 = FD({"A"}, {"C"})
+    fd3 = FD({"C", "G"}, {"H"})
+    fd4 = FD({"C", "G"}, {"I"})
+    fd5 = FD({"B"}, {"H"})
+    fds = [fd1, fd2, fd3, fd4, fd5]
+    test = Schema()
+    for fd in fds:
+        test.add_FD(fd, False)
+    sub_attributes = {"A", "G"}
+    sub_closure(sub_attributes, test.FDs)
 
     '''
     test Extraneous Attributes
     '''
-    # fd1 = FD({"A", "B"}, {"C", "D"})
-    # fd2 = FD({"A"}, {"E"})
-    # fd3 = FD({"E"}, {"C"})
-    # fds = [fd1, fd2, fd3]
-    # test = Schema()
-    # for fd in fds:
-    #     test.add_FD(fd, False)
-    # extrainous = test.is_extranious(fd1, {"C"}, determinant=False)
-    # print("C's extrainous in  AB -> CD is ", extrainous)
+    fd1 = FD({"A", "B"}, {"C", "D"})
+    fd2 = FD({"A"}, {"E"})
+    fd3 = FD({"E"}, {"C"})
+    fds = [fd1, fd2, fd3]
+    test = Schema()
+    for fd in fds:
+        test.add_FD(fd, False)
+    extrainous = is_extraneous(fd1, {"C"}, determinant=False, F=test.FDs)
+    print("C's extrainous in  AB -> CD is ", extrainous)
 
     '''
     test Canonical Cover
@@ -84,7 +87,8 @@ if __name__ == "__main__":
     for fd in fds:
         test.add_FD(fd, False)
     test.canonicalCover()
-
+    # fuck = is_extraneous(FD({"A"}, {"B", "C"}), {"B"}, determinant=False, F=test.FDs)
+    # print("fuck", fuck)
 
 
 
