@@ -61,15 +61,33 @@ if __name__ == "__main__":
     '''
     test Extraneous Attributes
     '''
-    fd1 = FD({"A", "B"}, {"C", "D"})
-    fd2 = FD({"A"}, {"E"})
-    fd3 = FD({"E"}, {"C"})
-    fds = [fd1, fd2, fd3]
+    # fd1 = FD({"A", "B"}, {"C", "D"})
+    # fd2 = FD({"A"}, {"E"})
+    # fd3 = FD({"E"}, {"C"})
+    # fds = [fd1, fd2, fd3]
+    # test = Schema()
+    # for fd in fds:
+    #     test.add_FD(fd, False)
+    # extrainous = test.is_extranious(fd1, {"C"}, determinant=False)
+    # print("C's extrainous in  AB -> CD is ", extrainous)
+
+    '''
+    test Canonical Cover
+    '''
+    fds = [
+        FD({"A"}, {"B", "C"}),
+        FD({"B"}, {"C"}),
+        FD({"A"}, {"B"}),
+        FD({"A", "B"}, {"C"})
+    ]
     test = Schema()
     for fd in fds:
         test.add_FD(fd, False)
-    extrainous = test.is_extranious(fd1, {"C"}, determinant=False)
-    print("C's extrainous in  AB -> CD is ", extrainous)
+    test.canonicalCover()
+
+
+
+
     '''
     test 1NF
     '''
