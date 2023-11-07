@@ -30,11 +30,16 @@ class FunctionalDependency:
                 return True
         return False
 
+    def is_travial(self):
+        if self.beta.issubset(self.alpha):
+            return True
+        return False
+
 class Schema:
 
-    def __init__(self, pks = None):
+    def __init__(self, cks:set = None):
         self.attrs = []
-        self.pks = pks
+        self.cks = cks
         self.FDs = set()
         self.F_plus = set()
 
@@ -55,42 +60,7 @@ class Schema:
         else:
             self.FDs.add(fd)
             
-    
-    def trans1NF(self):
-        """
-        output: 1NF schema list
-        """
-        fd_kind_dict = {}
-        for fd in self.FDs:
-
-            # Check if the masters are all pks
-            if(is_subset(fd.alpha, self.pks)):
-
-                master_name = ""
-                for master in fd.alpha:
-                    master_name += master
-                fd.show()
-                if master_name in fd_kind_dict.keys():
-                    fd_kind_dict[master_name].append(fd)
-                else:
-                    fd_kind_dict[master_name] = [fd]
-                    print("new masters = ", master_name)
-            
-            # Else, the msters have part not pks, find the master of the non-pks
-            else:
-                non_pk_masters = subtract_set(fd.alpha, self.pks)
-                new_masters = self.find_pks_masters(non_pk_masters) 
-
         
-        oneNFs = []
-        for fds in fd_kind_dict.values():
-            sch = Schema()
-            for fd in fds:
-                sch.add_FD(fd)
-            oneNFs.append(sch)
-        return oneNFs
-
-    
     def exist_fd(self, new_fd:FunctionalDependency, in_closure = False):
         # find the fd in clousure
         if in_closure:
@@ -245,14 +215,61 @@ class Schema:
             # input()
         return F_c_prime
 
+    def is_bcnf(self):
+        """
+        check the self schema is bcnf
+        output: bool, and FD(violate BCNF)
+        """
+        self.closure(update=True)
+        for fd in self.F_plus:
+            fd:FunctionalDependency
+            if fd.is_travial() or self.cks.issubset(fd.alpha):
+                continue
+            else:
+                return False, fd
+        return True, None
+
+    def remove(self, A:set):
+        """
+        Remove a set of attributes from the shcema
+        """
+        for a in A:
+            if a in self.attrs:
+                self.attrs.remove(a)
 
 
-    def bcnf_decompose(self, ):
-        pass
 
     def nf3_decompose(self, ):
         pass
 
+
+def bcnf_decompose(R:Schema):
+    result = [R]
+    
+    done = False
+    while done==False:
+        # if (there is a schema Ri in result that is not in BCNF)
+        for i, Ri in enumerate(result):
+            bcnf, bad_fd = Ri.is_bcnf()
+            print(i)
+            input()
+
+            intersect = bad_fd.alpha.intersection(bad_fd.beta)
+            print("bad_fd")
+            bad_fd.show()
+            if bcnf==False and (len(intersect)==0):
+                result.pop(i)
+                R_new = Ri.remove(bad_fd.beta)
+                R_ab = Schema()
+                R_ab.add_FD(bad_fd)
+
+                result.append(R_new)
+                result.append(R_ab)
+                input()
+                break
+            if i == len(result)-1:
+                done = True
+    return result
 
 def FD_set_pop(fd_set:set, fd_pop:FunctionalDependency):
     print("pop", end=" ")
